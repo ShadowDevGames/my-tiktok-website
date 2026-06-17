@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="nl" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>quiethomeserver — No Cloud. No Subs. Just the Build.</title>
+  <meta name="description" content="Follow the self-hosted homelab journey. No cloud, no subscriptions — just raw builds, clean setups, and honest tech. @quiethomeserver on TikTok." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cream: '#F8F5F0',
+            'cream-dark': '#EDE8E0',
+            sand: '#D4C4A0',
+            gold: '#8B6914',
+            'gold-light': '#C09A2F',
+            charcoal: '#2C2C2C',
+            ink: '#1A1A1A',
+          },
+          fontFamily: {
+            display: ['Cormorant Garamond', 'serif'],
+            body: ['Inter', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    html { background: #F8F5F0; }
+    body {
+      background: #F8F5F0;
+      color: #1A1A1A;
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Nav */
+    .nav-link {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #2C2C2C;
+      text-decoration: none;
+      position: relative;
+      padding-bottom: 2px;
+    }
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 0; height: 1px;
+      background: #8B6914;
+      transition: width 0.3s ease;
+    }
+    .nav-link:hover::after { width: 100%; }
+
+    /* Cursor blink */
+    .cursor-blink {
+      display: inline-block;
+      width: 3px;
+      height: 0.85em;
+      background: #8B6914;
+      margin-left: 4px;
+      vertical-align: middle;
+      animation: blink 1.1s step-end infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* Terminal chip */
+    .term-chip {
+      font-family: 'Courier New', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.05em;
+      background: #1A1A1A;
+      color: #C09A2F;
+      padding: 3px 10px;
+      border-radius: 2px;
+    }
+
+    /* TikTok button */
+    .tiktok-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #1A1A1A;
+      color: #F8F5F0;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 12px 24px;
+      text-decoration: none;
+      transition: background 0.25s, color 0.25s;
+      border: 1px solid #1A1A1A;
+    }
+    .tiktok-btn:hover {
+      background: #8B6914;
+      border-color: #8B6914;
+    }
+    .tiktok-btn-outline {
+      background: transparent;
+      color: #1A1A1A;
+      border: 1px solid #1A1A1A;
+    }
+    .tiktok-btn-outline:hover {
+      background: #1A1A1A;
+      color: #F8F5F0;
+    }
+
+    /* Hero */
+    .hero-section {
+      min-height: 100svh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: stretch;
+    }
+    @media (max-width: 768px) {
+      .hero-section { grid-template-columns: 1fr; }
+      .hero-img-col { min-height: 50svh; order: -1; }
+    }
+
+    /* Hero image placeholder / overlay */
+    .hero-img-col {
+      position: relative;
+      overflow: hidden;
+      background: #2C2C2C;
+    }
+    .hero-img-col img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      opacity: 0.85;
+      transition: transform 6s ease;
+    }
+    .hero-img-col:hover img { transform: scale(1.03); }
+    .hero-img-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(26,26,26,0.3) 0%, transparent 60%);
+    }
+
+    /* Stat chips */
+    .stat-item {
+      border-left: 1px solid #D4C4A0;
+      padding-left: 16px;
+    }
+
+    /* Section label */
+    .section-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #8B6914;
+    }
+
+    /* Content grid cards */
+    .content-card {
+      position: relative;
+      overflow: hidden;
+      background: #EDE8E0;
+      aspect-ratio: 9/16;
+      cursor: pointer;
+    }
+    .content-card img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    .content-card:hover img { transform: scale(1.05); }
+    .content-card-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(26,26,26,0.75) 0%, transparent 50%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .content-card:hover .content-card-overlay { opacity: 1; }
+
+    /* Play button */
+    .play-btn {
+      width: 52px; height: 52px;
+      border: 2px solid #F8F5F0;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .play-btn:hover { background: rgba(139,105,20,0.6); }
+
+    /* Collab logos placeholder */
+    .collab-logo {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: #D4C4A0;
+      text-transform: uppercase;
+      opacity: 0.7;
+      transition: opacity 0.3s;
+    }
+    .collab-logo:hover { opacity: 1; color: #8B6914; }
+
+    /* Divider */
+    .gold-divider {
+      width: 40px; height: 1px;
+      background: #8B6914;
+    }
+
+    /* Footer */
+    footer { border-top: 1px solid #D4C4A0; }
+
+    /* Dark mode */
+    html.dark body { background: #0F0F0F; color: #EDE8E0; }
+    html.dark .nav-link { color: #D4C4A0; }
+    html.dark nav { background: rgba(15,15,15,0.95) !important; border-bottom-color: #2C2C2C !important; }
+    html.dark .term-chip { background: #8B6914; color: #0F0F0F; }
+    html.dark footer { border-top-color: #2C2C2C; background: #0F0F0F; }
+    html.dark .stat-item { border-left-color: #2C2C2C; }
+    html.dark .content-card { background: #1A1A1A; }
+    html.dark .tiktok-btn-outline { color: #EDE8E0; border-color: #EDE8E0; }
+    html.dark .tiktok-btn-outline:hover { background: #EDE8E0; color: #0F0F0F; }
+    html.dark section.bg-cream-dark { background: #161616; }
+    html.dark .about-bg { background: #161616; }
+    html.dark .collab-bg { background: #0F0F0F; }
+
+    /* Scroll reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { opacity: 1; transform: none; transition: none; }
+      .cursor-blink { animation: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════ NAV ═══════════════════════════ -->
+<nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+     style="background: rgba(248,245,240,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid transparent;">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 flex items-center justify-between h-16">
+
+    <!-- Logo -->
+    <a href="#home" class="flex items-center gap-3 no-underline">
+      <span class="term-chip">~/home</span>
+      <span style="font-family:'Cormorant Garamond',serif; font-size:1.1rem; font-weight:500; letter-spacing:0.04em; color:#1A1A1A;">quiethomeserver</span>
+    </a>
+
+    <!-- Desktop nav -->
+    <ul class="hidden md:flex items-center gap-8 list-none m-0 p-0">
+      <li><a href="#home" class="nav-link">Home</a></li>
+      <li><a href="#content" class="nav-link">Content</a></li>
+      <li><a href="#builds" class="nav-link">Builds</a></li>
+      <li><a href="#about" class="nav-link">About</a></li>
+      <li><a href="#contact" class="nav-link">Contact</a></li>
+    </ul>
+
+    <!-- CTA + Dark toggle -->
+    <div class="flex items-center gap-4">
+      <button onclick="toggleDark()" class="hidden md:flex items-center justify-center w-8 h-8 rounded-full border border-current opacity-40 hover:opacity-80 transition-opacity" title="Toggle dark mode" aria-label="Toggle dark mode">
+        <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707z"/>
+        </svg>
+      </button>
+      <a href="https://www.tiktok.com/@quiethomeserver" target="_blank" class="hidden md:inline-flex tiktok-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.27 8.27 0 0 0 4.84 1.56V6.79a4.85 4.85 0 0 1-1.07-.1z"/></svg>
+        Volg op TikTok
+      </a>
+
+      <!-- Mobile hamburger -->
+      <button onclick="toggleMobileMenu()" class="md:hidden flex flex-col gap-1.5 p-2" aria-label="Menu">
+        <span class="block w-5 h-px bg-current transition-all" id="hb1"></span>
+        <span class="block w-5 h-px bg-current transition-all" id="hb2"></span>
+        <span class="block w-3 h-px bg-current transition-all" id="hb3"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile menu -->
+  <div id="mobile-menu" class="hidden md:hidden px-6 pb-6 pt-2 border-t border-current border-opacity-10">
+    <ul class="list-none m-0 p-0 space-y-4">
+      <li><a href="#home" class="nav-link" onclick="toggleMobileMenu()">Home</a></li>
+      <li><a href="#content" class="nav-link" onclick="toggleMobileMenu()">Content</a></li>
+      <li><a href="#builds" class="nav-link" onclick="toggleMobileMenu()">Builds</a></li>
+      <li><a href="#about" class="nav-link" onclick="toggleMobileMenu()">About</a></li>
+      <li><a href="#contact" class="nav-link" onclick="toggleMobileMenu()">Contact</a></li>
+    </ul>
+    <a href="https://www.tiktok.com/@quiethomeserver" target="_blank" class="tiktok-btn mt-6 w-full justify-center">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.27 8.27 0 0 0 4.84 1.56V6.79a4.85 4.85 0 0 1-1.07-.1z"/></svg>
+      Volg op TikTok
+    </a>
+  </div>
+</nav>
+
+
+<!-- ═══════════════════════════ HERO ═══════════════════════════ -->
+<section id="home" class="hero-section pt-16">
+
+  <!-- Text col -->
+  <div class="flex flex-col justify-center px-8 lg:px-16 xl:px-24 py-20 lg:py-0">
+    <div class="reveal">
+      <span class="section-label">@quiethomeserver</span>
+      <div class="gold-divider mt-3 mb-8"></div>
+    </div>
+
+    <h1 class="reveal reveal-delay-1" style="font-family:'Cormorant Garamond',serif; font-size:clamp(2.8rem,6vw,5.5rem); font-weight:300; line-height:1.08; letter-spacing:-0.01em; color:#1A1A1A;">
+      No Cloud.<br />
+      No Subs.<span class="cursor-blink"></span><br />
+      <em style="font-style:italic; font-weight:300;">Just the Build.</em>
+    </h1>
+
+    <p class="reveal reveal-delay-2 mt-8" style="font-family:'Inter',sans-serif; font-size:0.92rem; font-weight:300; line-height:1.8; color:#6B6560; max-width:38ch;">
+      Self-hosting mijn volledige digitale leven — van NAS tot VPN, van media server tot monitoring dashboards. Alles op eigen hardware. Geen abonnementen. Geen compromissen.
+    </p>
+
+    <!-- Stats -->
+    <div class="reveal reveal-delay-3 flex gap-8 mt-10">
+      <div class="stat-item">
+        <div style="font-family:'Cormorant Garamond',serif; font-size:2rem; font-weight:500; line-height:1; color:#1A1A1A;">152</div>
+        <div style="font-size:0.65rem; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; color:#8B6914; margin-top:4px;">Volgers</div>
+      </div>
+      <div class="stat-item">
+        <div style="font-family:'Cormorant Garamond',serif; font-size:2rem; font-weight:500; line-height:1; color:#1A1A1A;">1.191</div>
+        <div style="font-size:0.65rem; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; color:#8B6914; margin-top:4px;">Likes</div>
+      </div>
+      <div class="stat-item">
+        <div style="font-family:'Cormorant Garamond',serif; font-size:2rem; font-weight:500; line-height:1; color:#1A1A1A;">∞</div>
+        <div style="font-size:0.65rem; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; color:#8B6914; margin-top:4px;">Uptime</div>
+      </div>
+    </div>
+
+    <!-- CTAs -->
+    <div class="reveal reveal-delay-4 flex flex-wrap gap-4 mt-10">
+      <a href="https://www.tiktok.com/@quiethomeserver" target="_blank" class="tiktok-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.27 8.27 0 0 0 4.84 1.56V6.79a4.85 4.85 0 0 1-1.07-.1z"/></svg>
+        Volg de Build
+      </a>
+      <a href="#content" class="tiktok-btn tiktok-btn-outline">Bekijk Content</a>
+    </div>
+  </div>
+
+  <!-- Image col -->
+  <div class="hero-img-col">
+    <!-- Replace src with your own photo -->
+    <img
+      src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&q=80"
+      alt="Server rack homelab setup"
+      loading="eager"
+    />
+    <div class="hero-img-overlay"></div>
+    <!-- Floating label -->
+    <div style="position:absolute; bottom:32px; left:32px;">
+      <div style="font-family:'Courier New',monospace; font-size:0.68rem; color:#C09A2F; letter-spacing:0.08em;">
+        $ uptime —pretty<br />
+        <span style="color:#F8F5F0; opacity:0.7;">up 347 days, 14 hours, 22 minutes</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════ ABOUT ═══════════════════════════ -->
+<section id="about" class="about-bg py-24 lg:py-36" style="background:#EDE8E0;">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10">
+    <div class="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+
+      <!-- Image -->
+      <div class="reveal order-2 lg:order-1">
+        <div style="position:relative; aspect-ratio:4/5; overflow:hidden; background:#D4C4A0; max-width:460px;">
+          <!-- Replace with your photo -->
+          <img
+            src="https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=800&q=80"
+            alt="Creator aan het werk"
+            style="width:100%;height:100%;object-fit:cover;"
+            loading="lazy"
+          />
+          <!-- Badge -->
+          <div style="position:absolute; top:24px; right:-20px; background:#1A1A1A; padding:16px 20px; max-width:160px;">
+            <div style="font-family:'Courier New',monospace; font-size:0.62rem; color:#C09A2F; line-height:1.8;">
+              PROXMOX<br/>HOMEASSISTANT<br/>JELLYFIN<br/>NGINX<br/>PIHOLE<br/>WIREGUARD
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Text -->
+      <div class="reveal reveal-delay-2 order-1 lg:order-2">
+        <span class="section-label">Over mij</span>
+        <div class="gold-divider mt-3 mb-8"></div>
+        <h2 style="font-family:'Cormorant Garamond',serif; font-size:clamp(2rem,4vw,3.2rem); font-weight:300; line-height:1.15; color:#1A1A1A;">
+          Alles thuis.<br /><em>Alles onder controle.</em>
+        </h2>
+        <p class="mt-6" style="font-size:0.9rem; font-weight:300; line-height:1.9; color:#6B6560;">
+          Ik ben de man achter <strong style="font-weight:500; color:#1A1A1A;">quiethomeserver</strong> — een TikTok-account waar ik mijn reis als self-hoster documenteer. Van de eerste NAS tot een volledig orkestreerde homelab met Proxmox, containers, monitoring en automatisering.
+        </p>
+        <p class="mt-4" style="font-size:0.9rem; font-weight:300; line-height:1.9; color:#6B6560;">
+          Geen cloud-abonnementen. Geen Google Drive, geen iCloud, geen Netflix. Alles draait lokaal — op eigen hardware, op eigen voorwaarden. Ik laat zien dat het kan, stap voor stap.
+        </p>
+        <div class="mt-10 flex flex-wrap gap-3">
+          <span class="term-chip">#selfhosted</span>
+          <span class="term-chip">#homelab</span>
+          <span class="term-chip">#proxmox</span>
+          <span class="term-chip">#linux</span>
+          <span class="term-chip">#privacy</span>
+        </div>
+        <a href="https://www.tiktok.com/@quiethomeserver" target="_blank" class="tiktok-btn mt-10 inline-flex">
+          Volg mijn journey
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════ FEATURED CONTENT ═══════════════════════════ -->
+<section id="content" class="py-24 lg:py-36">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10">
+
+    <div class="reveal flex flex-col sm:flex-row sm:items-end justify-between mb-14 gap-6">
+      <div>
+        <span class="section-label">Featured Content</span>
+        <div class="gold-divider mt-3 mb-4"></div>
+        <h2 style="font-family:'Cormorant Garamond',serif; font-size:clamp(1.8rem,3.5vw,2.8rem); font-weight:300; line-height:1.2; color:#1A1A1A;">
+          Recente TikToks
+        </h2>
+      </div>
+      <a href="https://www.tiktok.com/@quiethomeserver" target="_blank"
+         class="nav-link" style="white-space:nowrap;">Alle video's bekijken →</a>
+    </div>
+
+    <!-- Video grid — replace thumbnails with your own -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+
+      <!-- Card template (repeat as needed) -->
+      <div class="reveal content-card">
+        <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=400&q=75" alt="Homelab video 1" loading="lazy" />
+        <div class="content-card-overlay">
+          <a href="https://www.tiktok.com/@quiethomeserver" target="_blank">
+            <div class="play-btn">
+              <svg width="18" height="18" fill="#F8F5F0" viewBox="0 0 16 16"><path d="M6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/></svg>
+            </div>
+          </a>
+        </div>
+        <div style="position:absolute;bottom:12px;left:12px;right:12px;">
+          <p style="font-family:'Inter',sans-serif;font-size:0.65rem;color:#F8F5F0;font-weight:500;letter-spacing:0.04em;line-height:1.4;">Mijn hele NAS setup uitgelegd</p>
+        </div>
+      </div>
+
+      <div class="reveal reveal-delay-1 content-card">
+        <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&q=75" alt="Homelab video 2" loading="lazy" />
+        <div class="content-card-overlay">
+          <a href="https://www.tiktok.com/@quiethomeserver" target="_blank">
+            <div class="play-btn"><svg width="18" height="18" fill="#F8F5F0" viewBox="0 0 16 16"><path d="M6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/></svg></div>
+          </a>
+        </div>
+        <div style="position:absolute;bottom:12px;left:12px;right:12px;">
+          <p style="font-family:'Inter',sans-serif;font-size:0.65rem;color:#F8F5F0;font-weight:500;letter-spacing:0.04em;line-height:1.4;">Pi-hole installeren in 10 minuten</p>
+        </div>
+      </div>
+
+      <div class="reveal reveal-delay-2 content-card">
+        <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&q=75" alt="Homelab video 3" loading="lazy" />
+        <div class="content-card-overlay">
+          <a href="https://www.tiktok.com/@quiethomeserver" target="_blank">
+            <div class="play-btn"><svg width="18" height="18" fill="#F8F5F0" viewBox="0 0 16 16"><path d="M6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/></svg></div>
+          </a>
+        </div>
+        <div style="position:absolute;bottom:12px;left:12px;right:12px;">
+          <p style="font-family:'Inter',sans-serif;font-size:0.65rem;color:#F8F5F0;font-weight:500;letter-spacing:0.04em;line-height:1.4;">Waarom ik stopte met cloud</p>
+        </div>
+      </div>
+
+      <div class="reveal reveal-delay-3 content-card">
+        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&q=75" alt="Homelab video 4" loading="lazy" />
+        <div class="content-card-overlay">
+          <a href="https://www.tiktok.com/@quiethomeserver" target="_blank">
+            <div class="play-btn"><svg width="18" height="18" fill="#F8F5F0" viewBox="0 0 16 16"><path d="M6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/></svg></div>
+          </a>
+        </div>
+        <div style="position:absolute;bottom:12px;left:12px;right:12px;">
+          <p style="font-family:'Inter',sans-serif;font-size:0.65rem;color:#F8F5F0;font-weight:500;letter-spacing:0.04em;line-height:1.4;">Home Assistant tour 2024</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CTA center -->
+    <div class="reveal mt-14 text-center">
+      <a href="https://www.tiktok.com/@quiethomeserver" target="_blank" class="tiktok-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.27 8.27 0 0 0 4.84 1.56V6.79a4.85 4.85 0 0 1-1.07-.1z"/></svg>
+        Volg voor meer
+      </a>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════ BUILDS / GEAR ═══════════════════════════ -->
+<section id="builds" class="py-24 lg:py-36" style="background:#EDE8E0;">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10">
+
+    <div class="reveal mb-14">
+      <span class="section-label">The Stack</span>
+      <div class="gold-divider mt-3 mb-4"></div>
+      <h2 style="font-family:'Cormorant Garamond',serif; font-size:clamp(1.8rem,3.5vw,2.8rem); font-weight:300; line-height:1.2; color:#1A1A1A;">
+        Hardware &amp; Software
+      </h2>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-px" style="background:#D4C4A0;">
+      <!-- Build card -->
+      <div class="reveal bg-cream p-8 lg:p-10" style="background:#F8F5F0;">
+        <div class="term-chip mb-4">01 — storage</div>
+        <h3 style="font-family:'Cormorant Garamond',serif; font-size:1.5rem; font-weight:400; color:#1A1A1A; margin:12px 0 8px;">NAS Server</h3>
+        <p style="font-size:0.85rem; font-weight:300; line-height:1.8; color:#6B6560;">
+          TrueNAS Scale op custom hardware. 24TB bruikbare opslag, ZFS RAIDZ2. Geen Dropbox, geen Google Drive — alles lokaal, altijd beschikbaar.
+        </p>
+      </div>
+
+      <div class="reveal reveal-delay-1 bg-cream p-8 lg:p-10" style="background:#F8F5F0;">
+        <div class="term-chip mb-4">02 — compute</div>
+        <h3 style="font-family:'Cormorant Garamond',serif; font-size:1.5rem; font-weight:400; color:#1A1A1A; margin:12px 0 8px;">Proxmox Cluster</h3>
+        <p style="font-size:0.85rem; font-weight:300; line-height:1.8; color:#6B6560;">
+          Twee nodes, tientallen containers en VMs. Jellyfin, Nextcloud, Vaultwarden, Immich — alles in productie, alles gemanaged via Proxmox.
+        </p>
+      </div>
+
+      <div class="reveal reveal-delay-2 bg-cream p-8 lg:p-10" style="background:#F8F5F0;">
+        <div class="term-chip mb-4">03 — network</div>
+        <h3 style="font-family:'Cormorant Garamond',serif; font-size:1.5rem; font-weight:400; color:#1A1A1A; margin:12px 0 8px;">Eigen netwerk</h3>
+        <p style="font-size:0.85rem; font-weight:300; line-height:1.8; color:#6B6560;">
+          Pi-hole voor DNS-filtering, WireGuard voor remote access, Nginx Proxy Manager voor reverse proxy. Volledig in eigen handen.
+        </p>
+      </div>
+
+      <div class="reveal reveal-delay-1 bg-cream p-8 lg:p-10" style="background:#F8F5F0;">
+        <div class="term-chip mb-4">04 — automation</div>
+        <h3 style="font-family:'Cormorant Garamond',serif; font-size:1.5rem; font-weight:400; color:#1A1A1A; margin:12px 0 8px;">Home Assistant</h3>
+        <p style="font-size:0.85rem; font-weight:300; line-height:1.8; color:#6B6560;">
+          Lokale smart home automatisering zonder cloud. Geen Alexa, geen Google Home — alles draait lokaal, met volledige controle.
+        </p>
+      </div>
+
+      <div class="reveal reveal-delay-2 bg-cream p-8 lg:p-10" style="background:#F8F5F0;">
+        <div class="term-chip mb-4">05 — monitoring</div>
+        <h3 style="font-family:'Cormorant Garamond',serif; font-size:1.5rem; font-weight:400; color:#1A1A1A; margin:12px 0 8px;">Grafana + Prometheus</h3>
+        <p style="font-size:0.85rem; font-weight:300; line-height:1.8; color:#6B6560;">
+          Real-time dashboards voor CPU, RAM, temperatuur, netwerk en uptime. Want als het stil is, moet je weten waarom.
+        </p>
+      </div>
+
+      <div class="reveal reveal-delay-3 bg-cream p-8 lg:p-10" style="background:#F8F5F0;">
+        <div class="term-chip mb-4">06 — backup</div>
+        <h3 style="font-family:'Cormorant Garamond',serif; font-size:1.5rem; font-weight:400; color:#1A1A1A; margin:12px 0 8px;">3-2-1 Backup</h3>
+        <p style="font-size:0.85rem; font-weight:300; line-height:1.8; color:#6B6560;">
+          Drie kopieën, twee media, één offsite. Restic + Borgmatic geautomatiseerd. Want één backup is geen backup.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════ COMMUNITY / COLLAB ═══════════════════════════ -->
+<section class="collab-bg py-24 lg:py-32" style="background:#1A1A1A;">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 text-center">
+    <div class="reveal">
+      <span class="section-label" style="color:#8B6914;">Community</span>
+      <div class="gold-divider mt-3 mb-8 mx-auto"></div>
+      <h2 style="font-family:'Cormorant Garamond',serif; font-size:clamp(2rem,4vw,3.5rem); font-weight:300; line-height:1.15; color:#EDE8E0;">
+        Deel van de<br /><em>selfhost beweging</em>
+      </h2>
+      <p class="mt-6 mx-auto" style="font-size:0.9rem; font-weight:300; line-height:1.9; color:#8B8076; max-width:42ch;">
+        Samen met andere self-hosters bouwen we aan een wereld zonder cloud-afhankelijkheid. Ben jij er ook klaar voor?
+      </p>
+    </div>
+
+    <div class="reveal reveal-delay-2 flex flex-wrap justify-center gap-12 mt-16">
+      <span class="collab-logo">r/selfhosted</span>
+      <span class="collab-logo">r/homelab</span>
+      <span class="collab-logo">TrueNAS</span>
+      <span class="collab-logo">Proxmox</span>
+      <span class="collab-logo">LinuxServer.io</span>
+      <span class="collab-logo">Home Assistant</span>
+    </div>
+
+    <div class="reveal reveal-delay-3 mt-16">
+      <a href="https://www.tiktok.com/@quiethomeserver" target="_blank" class="tiktok-btn" style="background:#8B6914; border-color:#8B6914; color:#F8F5F0;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.27 8.27 0 0 0 4.84 1.56V6.79a4.85 4.85 0 0 1-1.07-.1z"/></svg>
+        Sluit je aan
+      </a>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════ CONTACT ═══════════════════════════ -->
+<section id="contact" class="py-24 lg:py-36">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10">
+    <div class="grid lg:grid-cols-2 gap-16 lg:gap-32 items-start">
+
+      <div class="reveal">
+        <span class="section-label">Contact</span>
+        <div class="gold-divider mt-3 mb-8"></div>
+        <h2 style="font-family:'Cormorant Garamond',serif; font-size:clamp(2rem,4vw,3.2rem); font-weight:300; line-height:1.15; color:#1A1A1A;">
+          Vragen over<br /><em>de setup?</em>
+        </h2>
+        <p class="mt-6" style="font-size:0.9rem; font-weight:300; line-height:1.9; color:#6B6560;">
+          Wil je samenwerken, meer weten over mijn hardware keuzes, of heb je een vraag over self-hosting? Stuur me een berichtje.
+        </p>
+        <div class="mt-10 space-y-4">
+          <a href="https://www.tiktok.com/@quiethomeserver" target="_blank" class="flex items-center gap-3 no-underline group">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#8B6914"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.27 8.27 0 0 0 4.84 1.56V6.79a4.85 4.85 0 0 1-1.07-.1z"/></svg>
+            <span style="font-size:0.85rem; font-weight:400; color:#1A1A1A;">@quiethomeserver op TikTok</span>
+          </a>
+          <!-- Add more contact channels as needed -->
+        </div>
+      </div>
+
+      <!-- Simple contact form -->
+      <div class="reveal reveal-delay-2">
+        <div style="background:#EDE8E0; padding:40px;">
+          <div class="space-y-6">
+            <div>
+              <label style="font-size:0.68rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:#8B6914; display:block; margin-bottom:8px;">Naam</label>
+              <input type="text" placeholder="Jouw naam" style="width:100%; background:transparent; border:none; border-bottom:1px solid #D4C4A0; padding:8px 0; font-family:'Inter',sans-serif; font-size:0.9rem; font-weight:300; color:#1A1A1A; outline:none; transition:border-color 0.2s;" onfocus="this.style.borderColor='#8B6914'" onblur="this.style.borderColor='#D4C4A0'" />
+            </div>
+            <div>
+              <label style="font-size:0.68rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:#8B6914; display:block; margin-bottom:8px;">E-mail</label>
+              <input type="email" placeholder="jouw@email.nl" style="width:100%; background:transparent; border:none; border-bottom:1px solid #D4C4A0; padding:8px 0; font-family:'Inter',sans-serif; font-size:0.9rem; font-weight:300; color:#1A1A1A; outline:none; transition:border-color 0.2s;" onfocus="this.style.borderColor='#8B6914'" onblur="this.style.borderColor='#D4C4A0'" />
+            </div>
+            <div>
+              <label style="font-size:0.68rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:#8B6914; display:block; margin-bottom:8px;">Bericht</label>
+              <textarea rows="4" placeholder="Vertel me over jouw setup of vraag..." style="width:100%; background:transparent; border:none; border-bottom:1px solid #D4C4A0; padding:8px 0; font-family:'Inter',sans-serif; font-size:0.9rem; font-weight:300; color:#1A1A1A; outline:none; resize:none; transition:border-color 0.2s;" onfocus="this.style.borderColor='#8B6914'" onblur="this.style.borderColor='#D4C4A0'"></textarea>
+            </div>
+            <button onclick="handleFormSubmit(this)" class="tiktok-btn w-full justify-center mt-2" style="border:none; cursor:pointer; width:100%; display:flex;">
+              Verstuur bericht
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════ FOOTER ═══════════════════════════ -->
+<footer class="py-12" style="background:#F8F5F0;">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="flex items-center gap-3">
+        <span class="term-chip">~/home</span>
+        <span style="font-family:'Cormorant Garamond',serif; font-size:1rem; font-weight:500; color:#1A1A1A;">quiethomeserver</span>
+      </div>
+      <nav class="flex flex-wrap justify-center gap-6">
+        <a href="#home" class="nav-link">Home</a>
+        <a href="#content" class="nav-link">Content</a>
+        <a href="#builds" class="nav-link">Builds</a>
+        <a href="#about" class="nav-link">About</a>
+        <a href="#contact" class="nav-link">Contact</a>
+      </nav>
+      <a href="https://www.tiktok.com/@quiethomeserver" target="_blank" style="display:flex;align-items:center;gap:6px;font-size:0.75rem;font-weight:500;letter-spacing:0.08em;color:#8B6914;text-decoration:none;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.27 8.27 0 0 0 4.84 1.56V6.79a4.85 4.85 0 0 1-1.07-.1z"/></svg>
+        @quiethomeserver
+      </a>
+    </div>
+    <div class="mt-8 pt-6 text-center" style="border-top:1px solid #D4C4A0;">
+      <p style="font-size:0.72rem; color:#A09890; letter-spacing:0.06em;">
+        © 2025 quiethomeserver · No cloud · No subs · Self-hosted with ♥
+      </p>
+    </div>
+  </div>
+</footer>
+
+
+<script>
+  /* ── Dark mode ── */
+  function toggleDark() {
+    document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+  }
+  if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
+
+  /* ── Navbar scroll ── */
+  window.addEventListener('scroll', () => {
+    const nav = document.getElementById('navbar');
+    if (window.scrollY > 40) {
+      nav.style.borderBottomColor = '#D4C4A0';
+      nav.style.boxShadow = '0 1px 20px rgba(0,0,0,0.06)';
+    } else {
+      nav.style.borderBottomColor = 'transparent';
+      nav.style.boxShadow = 'none';
+    }
+  });
+
+  /* ── Mobile menu ── */
+  function toggleMobileMenu() {
+    const m = document.getElementById('mobile-menu');
+    m.classList.toggle('hidden');
+  }
+
+  /* ── Scroll reveal ── */
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  /* ── Form submit feedback ── */
+  function handleFormSubmit(btn) {
+    btn.textContent = 'Verstuurd ✓';
+    btn.style.background = '#8B6914';
+    btn.style.borderColor = '#8B6914';
+    setTimeout(() => {
+      btn.textContent = 'Verstuur bericht';
+      btn.style.background = '';
+      btn.style.borderColor = '';
+    }, 3000);
+  }
+</script>
+</body>
+</html>
